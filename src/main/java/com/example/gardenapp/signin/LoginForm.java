@@ -28,19 +28,18 @@ public class LoginForm {
 
             if (username.isEmpty() || password.isEmpty()) {
                 errorLabel.setText("Please enter username and password.");
+                errorLabel.setStyle("-fx-text-fill: red;");
                 return;
             }
 
-            boolean success = LoginDatabase.checkLogin(username, password);
-            if (success) {
-                loggedInUser = new User(username, "");
+            User user = LoginDatabase.checkLogin(username, password);
+            if (user!=null) {
+                loggedInUser = user;
                 errorLabel.setText("Login successful!");
-                new Thread(() -> {
-                    try { Thread.sleep(1000); } catch (InterruptedException ignored) {}
-                    loginStage.close();
-                }).start();
+                loginStage.close();
             } else {
                 errorLabel.setText("Invalid username or password.");
+                errorLabel.setStyle("-fx-text-fill: red;");
             }
 
         });

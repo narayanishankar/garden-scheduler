@@ -18,7 +18,7 @@ public class LoginDatabase {
         String sql = "CREATE TABLE IF NOT EXISTS users (" +
                 "id INTEGER PRIMARY KEY AUTOINCREMENT," +
                 "username TEXT NOT NULL UNIQUE," +
-                "email TEXT," +
+                "email TEXT NOT NULL," +
                 "password TEXT NOT NULL" +
                 ");";
         try (Statement stmt = conn.createStatement()) {
@@ -29,17 +29,20 @@ public class LoginDatabase {
         }
     }
 
-    public static boolean checkLogin(String username, String password) {
+    public static User checkLogin(String username, String password) {
         String sql = "SELECT * FROM users WHERE username = ? AND password = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, username);
             pstmt.setString(2, password);
             ResultSet rs = pstmt.executeQuery();
-            return rs.next(); // true if user exists
+            if(rs.next()){ // true if user exists
+                User user = new User(rs.getInt("id"), rs.getString("username"), rs.getString("email"));
+                return user;
+            }
         } catch (SQLException e) {
             System.out.println("Login check failed: " + e.getMessage());
-            return false;
         }
+        return null;
     }
 
     public static boolean addUser(String username, String email, String password) {

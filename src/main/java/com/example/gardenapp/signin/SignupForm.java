@@ -12,7 +12,6 @@ public class SignupForm {
         Stage signupStage = new Stage();
         signupStage.setTitle("Create New Account");
 
-        Label errorLabel = new Label();
 
         // Labels and fields
         Label userLabel = new Label("Username:");
@@ -33,27 +32,36 @@ public class SignupForm {
             String password = passField.getText();
 
             if (username.isEmpty() || password.isEmpty()) {
-                errorLabel.setText("Username and password are required!");
+                Alert alert = new Alert(Alert.AlertType.ERROR, "Please enter both a username and password.");
+                alert.showAndWait();
+                return;
+            }
+
+            String emailPattern = "^[A-Za-z0-9+_.-]+@(.+)$";
+            if (!email.matches(emailPattern)) {
+                new Alert(Alert.AlertType.ERROR, "Please enter a valid email address format.").show();
                 return;
             }
 
             boolean success = LoginDatabase.addUser(username, email, password);
 
             if (success) {
-                errorLabel.setText("Account created successfully!");
-                new Thread(() -> {
-                    try { Thread.sleep(1000); } catch (InterruptedException ignored) {}
-                    signupStage.close();
-                }).start();
+                Alert alert = new Alert(Alert.AlertType.INFORMATION, "Account Created! You can now log in.");
+                alert.showAndWait(); // This pauses until they click OK
+                signupStage.close();
             } else {
-                errorLabel.setText("Error: username may already exist.");
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Registration Error");
+                alert.setHeaderText("Username Taken");
+                alert.setContentText("The username '" + username + "' is already in use. Please try a different one.");
+                alert.showAndWait();
             }
         });
 
         // Layout
         VBox layout = new VBox(10);
         layout.setPadding(new Insets(20));
-        layout.getChildren().addAll(userLabel, userField, emailLabel, emailField, passLabel, passField, signupBtn, errorLabel);
+        layout.getChildren().addAll(userLabel, userField, emailLabel, emailField, passLabel, passField, signupBtn);
 
         Scene scene = new Scene(layout, 300, 250);
         signupStage.setScene(scene);
